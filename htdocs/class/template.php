@@ -17,7 +17,7 @@
  * @package             kernel
  * @subpackage          core
  */
-
+use Smarty\Smarty;
 defined('XOOPS_ROOT_PATH') || exit('Restricted access');
 
 xoops_loadLanguage('global');
@@ -30,6 +30,7 @@ xoops_loadLanguage('global');
  * @author              Kazumi Ono <onokazu@xoops.org>
  * @copyright       (c) 2000-2022 XOOPS Project (https://xoops.org)
  */
+
 class XoopsTpl extends Smarty
 {
     /** @var xos_opal_Theme */
@@ -48,8 +49,8 @@ class XoopsTpl extends Smarty
         $this->setTemplateDir(XOOPS_THEME_PATH);
         $this->setCacheDir(XOOPS_VAR_PATH . '/caches/smarty_cache');
         $this->setCompileDir(XOOPS_VAR_PATH . '/caches/smarty_compile');
-        $this->compile_check   = \Smarty::COMPILECHECK_ON; // ($xoopsConfig['theme_fromfile'] == 1);
-        $this->addPluginsDir(XOOPS_ROOT_PATH . '/class/smarty3_plugins');
+        //$this->compile_check   = COMPILECHECK_ON; // ($xoopsConfig['theme_fromfile'] == 1);
+        $this->addPluginsDir(XOOPS_ROOT_PATH . '/class/smarty5_plugins/');
 
         // Register the count function
         $this->registerPlugin('modifier', 'count', 'count');
@@ -57,6 +58,11 @@ class XoopsTpl extends Smarty
         $this->registerPlugin('modifier', 'strstr', 'strstr');
         // Register the trim function
         $this->registerPlugin('modifier', 'trim', 'trim');
+
+        // Register the xoAppUrl function
+        $this->registerPlugin('function', 'xoAppUrl', 'xoAppUrl');
+        // Register the xoImgUrl function
+        $this->registerPlugin('function', 'xoImgUrl', 'xoImgUrl');
 
         if ($xoopsConfig['debug_mode']) {
             $this->debugging_ctrl = 'URL';
@@ -299,8 +305,20 @@ class XoopsTpl extends Smarty
      */
     public function assign_by_ref($tpl_var, &$value)
     {
-        $GLOBALS['xoopsLogger']->addDeprecated(__METHOD__ . " is deprecated, please use assignByRef");
-        $this->assignByRef($tpl_var, $value);
+        $GLOBALS['xoopsLogger']->addDeprecated(__METHOD__ . " is deprecated, please use assign");
+        $this->assign($tpl_var, $value);
+    }
+
+    /**
+     * deprecated assignByRef
+     *
+     * @param string $tpl_var the template variable name
+     * @param mixed  &$value  the referenced value to assign
+     */
+    public function assignByRef($tpl_var, &$value)
+    {
+        $GLOBALS['xoopsLogger']->addDeprecated(__METHOD__ . " is deprecated, please use assign");
+        $this->assign($tpl_var, $value);
     }
 
     /**
@@ -312,8 +330,21 @@ class XoopsTpl extends Smarty
      */
     public function append_by_ref($tpl_var, &$value, $merge = false)
     {
+        $GLOBALS['xoopsLogger']->addDeprecated(__METHOD__ . " is deprecated, please use append");
+        $this->append($tpl_var, $value, $merge);
+    }
+
+    /**
+     * deprecated appendByRef
+     *
+     * @param string  $tpl_var the template variable name
+     * @param mixed   &$value  the referenced value to append
+     * @param boolean $merge   flag if array elements shall be merged
+     */
+    public function appendByRef($tpl_var, &$value, $merge = false)
+    {
         $GLOBALS['xoopsLogger']->addDeprecated(__METHOD__ . " is deprecated, please use appendByRef");
-        $this->appendByRef($tpl_var, $value, $merge);
+        $this->append($tpl_var, $value, $merge);
     }
 
     /**
@@ -766,4 +797,39 @@ function xoops_template_clear_module_cache($mid)
             }
         }
     }
+}
+
+/**
+ * Smarty plugin function xoAppUrl
+ *
+ * @param array  $params
+ * @param Smarty $smarty
+ * @return string
+ */
+function xoAppUrl($params, $smarty)
+{
+    global $xoops;
+    $arg = reset($params);
+    $url = trim($arg, " '\"\t\n\r\0\x0B");
+
+    if (strpos($url, '/') === 0) {
+        $url = 'www' . $url;
+    }
+    return "<?php echo '" . addslashes(htmlspecialchars($xoops->url($url), ENT_QUOTES | ENT_HTML5)) . "'; ?>";
+}
+
+/**
+ * Smarty plugin function xoImgUrl
+ *
+ * @param array  $params
+ * @param Smarty $smarty
+ * @return string
+ */
+function xoImgUrl($params, $smarty)
+{
+    global $xoops, $xoTheme;
+    $arg = reset($params);
+    $arg = trim($arg, " '\"\t\n\r\0\x0B");
+    $path = (isset($xoTheme) && is_object($xoTheme)) ? $xoTheme->resourcePath($arg) : $arg;
+    return "<?php echo '" . addslashes($xoops->url($path)) . "'; ?>";
 }
