@@ -20,7 +20,7 @@
  * mechanism and rules you'll have configured for the system.
  *
  * // Generate a URL using a physical path
- * <{xoAppUrl 'modules/something/yourpage.php'}>
+ * <{xoAppUrl url='modules/something/yourpage.php'}>
  *
  * The path should be in a form understood by Xoops::url()
  *
@@ -28,6 +28,7 @@
  * @param Smarty   $smarty
  * @return string
  */
+use Smarty\Smarty;
 function smarty_compiler_xoAppUrl($params, Smarty $smarty)
 {
     global $xoops;
