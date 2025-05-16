@@ -111,6 +111,7 @@ $modversion['templates'][] = ['file' => 'system_templates.tpl', 'description' =>
 $modversion['templates'][] = ['file' => 'system_index.tpl', 'description' => '', 'type' => 'admin'];
 $modversion['templates'][] = ['file' => 'system_maintenance.tpl', 'description' => '', 'type' => 'admin'];
 $modversion['templates'][] = ['file' => 'system_help.tpl', 'description' => '', 'type' => 'admin'];
+$modversion['templates'][] = ['file' => 'system_menus.tpl', 'description' => '', 'type' => 'admin'];
 
 // Admin Modules
 $modversion['templates'][] = ['file' => 'system_modules_menu.tpl', 'description' => '', 'type' => 'module'];
